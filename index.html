@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#252e50">
+<title>Crypto Monitor</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+:root{--bg:#202946;--panel:#2d385c;--panel2:#39466d;--muted:#9eabc9;--white:#f4f6ff;--pink:#f36bb6;--cyan:#35d5ee;--green:#4cdb9a;--red:#ff7e9b}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at 50% -15%,#7886b0 0,#343f66 42%,#202946 78%);color:var(--white);font-family:Inter,ui-sans-serif,system-ui,-apple-system,Segoe UI,Arial,sans-serif;min-height:100vh;padding:20px 14px calc(24px + env(safe-area-inset-bottom))}
+.app{max-width:460px;margin:auto}.top{display:flex;align-items:center;justify-content:space-between;padding:8px 4px 18px}.brand{font-size:12px;letter-spacing:3px;font-weight:800}.live{font-size:10px;color:var(--green);letter-spacing:1px}.hero{position:relative;overflow:hidden;border-radius:23px;padding:22px 21px 20px;background:linear-gradient(120deg,#9b70e7 0%,#ec66b4 75%,#fa80ac 100%);box-shadow:0 18px 45px #111a3766;margin-bottom:18px}.hero:after{content:"";position:absolute;width:240px;height:130px;border-radius:50%;right:-55px;bottom:-85px;background:#fff2;transform:rotate(-18deg)}.hero small{font-size:10px;letter-spacing:1.8px;font-weight:700}.hero h1{font-size:30px;font-weight:500;margin:18px 0 3px;letter-spacing:-1px}.hero p{font-size:12px;margin:0;opacity:.92}.hero-foot{display:flex;justify-content:space-between;align-items:center;margin-top:20px;font-size:11px}.refresh{border:0;border-radius:50%;width:40px;height:40px;background:#ffffffed;color:#e35eaa;font-size:20px}
+.section-title{display:flex;justify-content:space-between;align-items:center;margin:22px 3px 12px}.section-title b{font-size:16px;font-weight:600}.section-title span{font-size:10px;color:var(--muted)}
+.card{background:linear-gradient(145deg,#3c496f,#2c3658);border:1px solid #ffffff0b;border-radius:18px;padding:16px;margin-bottom:11px;box-shadow:0 9px 25px #111a302b}
+.coin-head{display:flex;justify-content:space-between;align-items:center;gap:10px}.coin-name{display:flex;align-items:center;gap:10px}.coin-icon{width:36px;height:36px;border-radius:12px;background:linear-gradient(140deg,#f4a1d2,#a77df0);display:grid;place-items:center;font-weight:800;color:white}.coin-name strong{font-size:13px}.coin-name small{display:block;color:var(--muted);font-size:10px;margin-top:3px}.spread{text-align:right}.spread b{font-size:15px;color:var(--green)}.spread small{display:block;color:var(--muted);font-size:9px;margin-top:3px}
+.prices{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:14px}.pricebox{background:#202a48a8;border-radius:12px;padding:11px}.pricebox span{font-size:9px;color:var(--muted);letter-spacing:.8px}.pricebox b{display:block;font-size:15px;margin-top:5px;font-weight:600}.pricebox small{font-size:9px;color:var(--muted)}
+.note{font-size:10px;line-height:1.5;color:#b8c3dd;margin:8px 3px}.status{font-size:10px;color:var(--muted);text-align:center;margin:14px 0}.actions{display:flex;gap:9px}.btn{flex:1;border:1px solid #8794bd44;border-radius:12px;background:#ffffff0b;color:var(--white);padding:12px;font-size:11px;font-weight:600}.btn.primary{background:linear-gradient(100deg,#a56ee8,#ee69b4);border:0}
+select{background:#202a48;color:white;border:1px solid #ffffff20;border-radius:10px;padding:9px;font-size:11px;outline:none}
+.footer{text-align:center;color:#7f8cad;font-size:9px;margin:20px 0 6px;line-height:1.6}
+.pill{border-radius:30px;padding:5px 9px;background:#ffffff12;color:#dce4ff;font-size:9px}
+.coin-actions{display:flex;justify-content:flex-end;margin-top:12px}
+.chart-btn{border:1px solid #d889e766;border-radius:10px;background:#ffffff0b;color:#f4d9f0;padding:9px 13px;font-size:10px;font-weight:700}
+.chart-panel{display:none;margin-top:12px;border-radius:13px;overflow:hidden;background:#202a48}
+.chart-panel.open{display:block}.chart-panel iframe{display:block;width:100%;height:360px;border:0}
+.chart-head{display:flex;align-items:center;justify-content:space-between;padding:10px 12px;font-size:11px;color:#dce4ff}
+.chart-close{border:0;background:#ffffff18;color:white;border-radius:8px;padding:6px 10px}
+@media(min-width:500px){body{padding-top:30px}.app{max-width:480px}}
+</style>
+</head>
+<body>
+<main class="app">
+  <div class="top"><div class="brand">CRYPTO <span style="color:#e879bd">/</span> MONITOR</div><div class="live">● LIVE MONITOR</div></div>
+  <section class="hero">
+    <small>MARKET OVERVIEW</small>
+    <h1 id="heroPrice">$ —</h1>
+    <p id="heroLabel">BTC / USDT • загружаем котировки…</p>
+    <div class="hero-foot"><span id="heroSpread">Разница между биржами: —</span><button class="refresh" id="refresh" aria-label="Обновить">↻</button></div>
+  </section>
+  <div class="section-title"><b>Мониторинг рынка</b><select id="interval"><option value="15000">15 сек</option><option value="30000">30 сек</option><option value="60000">60 сек</option></select></div>
+  <div class="section-title" style="margin-top:0"><span>МОНЕТА</span><span>РАЗНИЦА ЦЕН</span></div>
+  <div id="coins"></div>
+  <div class="actions"><button class="btn primary" id="refresh2">Обновить котировки</button><button class="btn" id="about">Как читать спред?</button></div>
+  <div class="status" id="status">Подключение к публичным API…</div>
+  <div class="footer">Только просмотр публичных рыночных данных • Без торговли и хранения ключей<br>Спред не равен гарантированной прибыли: комиссии, проскальзывание и задержки не учтены.</div>
+</main>
+<script>
+(() => {
+ const tg = window.Telegram?.WebApp;
+ if (tg) { tg.ready(); tg.expand(); try { tg.setHeaderColor('#293454'); tg.setBackgroundColor('#202946'); } catch(e){} }
+ const coins = [
+  {s:'BTCUSDT',n:'Bitcoin',t:'BTC',i:'₿'},
+  {s:'ETHUSDT',n:'Ethereum',t:'ETH',i:'◆'},
+  {s:'TONUSDT',n:'Toncoin',t:'TON',i:'T'},
+  {s:'NOTUSDT',n:'Notcoin',t:'NOT',i:'N'}
+ ];
+ const fmt = n => Number.isFinite(n) ? n.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:n>100?2:5}) : '—';
+ const el = id => document.getElementById(id);
+ let timer;
+ async function fetchJson(url){
+   const r=await fetch(url,{cache:'no-store'});
+   if(!r.ok) throw Error('HTTP '+r.status);
+   return r.json();
+ }
+ async function firstWorking(urls,read){
+   let lastError;
+   for(const url of urls){try{return read(await fetchJson(url));}catch(e){lastError=e;}}
+   throw lastError||Error('API недоступен');
+ }
+ async function getPrices(symbol){
+   const binance = firstWorking([
+     'https://data-api.binance.vision/api/v3/ticker/price?symbol='+symbol,
+     'https://api.binance.com/api/v3/ticker/price?symbol='+symbol,
+     'https://api1.binance.com/api/v3/ticker/price?symbol='+symbol
+   ],x=>{const n=Number(x.price);if(!Number.isFinite(n)||n<=0)throw Error('Нет цены');return n;});
+   const bybit = firstWorking([
+     'https://api.bybit.com/v5/market/tickers?category=spot&symbol='+symbol,
+     'https://api.bytick.com/v5/market/tickers?category=spot&symbol='+symbol
+   ],x=>{if(x.retCode!==0||!x.result?.list?.length)throw Error(x.retMsg||'Пара недоступна');const n=Number(x.result.list[0].lastPrice);if(!Number.isFinite(n)||n<=0)throw Error('Нет цены');return n;});
+   return Promise.allSettled([binance,bybit]);
+ }
+ async function update(){
+   el('status').textContent='Обновляем данные…';
+   el('refresh').textContent='…';
+   const results = await Promise.all(coins.map(async c=>({coin:c,res:await getPrices(c.s)})));
+   let good=0, btc=null;
+   el('coins').innerHTML='';
+   for(const {coin,res} of results){
+     const b=res[0].status==='fulfilled'?res[0].value:NaN;
+     const y=res[1].status==='fulfilled'?res[1].value:NaN;
+     if(Number.isFinite(b)&&Number.isFinite(y)&&b>0&&y>0) good++;
+     if(coin.t==='BTC'&&Number.isFinite(b)&&Number.isFinite(y)) btc=(b+y)/2;
+     const low=Math.min(b,y), high=Math.max(b,y);
+     const spread=Number.isFinite(low)&&low>0&&Number.isFinite(high)?(high-low)/low*100:NaN;
+     const card=document.createElement('section'); card.className='card';
+     card.innerHTML=`<div class="coin-head"><div class="coin-name"><div class="coin-icon">${coin.i}</div><div><strong>${coin.n}</strong><small>${coin.t} / USDT</small></div></div><div class="spread"><b>${Number.isFinite(spread)?spread.toFixed(3)+'%':'—'}</b><small>ценовой спред</small></div></div>
+       <div class="prices"><div class="pricebox"><span>BINANCE</span><b>${Number.isFinite(b)?'$'+fmt(b):'Нет данных'}</b><small>${Number.isFinite(b)?'Публичная цена':'API недоступен'}</small></div><div class="pricebox"><span>BYBIT</span><b>${Number.isFinite(y)?'$'+fmt(y):'Нет данных'}</b><small>${Number.isFinite(y)?'Публичная цена':'API недоступен'}</small></div></div>
+       <div class="coin-actions"><button class="chart-btn" data-symbol="${coin.s}" data-name="${coin.n}">Открыть график ↗</button></div>
+       <div class="chart-panel"><div class="chart-head"><span>${coin.t} / USDT • TradingView</span><button class="chart-close">Закрыть</button></div><iframe title="График ${coin.t}" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe></div>`;
+     el('coins').appendChild(card);
+     const chartBtn=card.querySelector('.chart-btn'), panel=card.querySelector('.chart-panel'), frame=panel.querySelector('iframe');
+     chartBtn.addEventListener('click',()=>{
+       document.querySelectorAll('.chart-panel.open').forEach(p=>{if(p!==panel){p.classList.remove('open');}});
+       panel.classList.toggle('open');
+       if(panel.classList.contains('open')&&!frame.src){
+         frame.src='https://s.tradingview.com/widgetembed/?symbol=BINANCE%3A'+coin.s+'&interval=60&hidesidetoolbar=1&symboledit=0&saveimage=0&toolbarbg=%23202a48&theme=dark&style=1&timezone=Etc%2FUTC&withdateranges=1&hideideas=1';
+       }
+       if(panel.classList.contains('open')) panel.scrollIntoView({behavior:'smooth',block:'nearest'});
+     });
+     panel.querySelector('.chart-close').addEventListener('click',()=>panel.classList.remove('open'));
+   }
+   const btcCard=results.find(x=>x.coin.t==='BTC');
+   const bp=btcCard?.res||[];
+   const b=bp[0]?.status==='fulfilled'?bp[0].value:NaN, y=bp[1]?.status==='fulfilled'?bp[1].value:NaN;
+   el('heroPrice').textContent=Number.isFinite(b)&&Number.isFinite(y)?'$ '+fmt((b+y)/2):'BTC / USDT';
+   el('heroLabel').textContent='Средняя цена Binance и Bybit';
+   el('heroSpread').textContent=Number.isFinite(b)&&Number.isFinite(y)?'Разница: '+(Math.abs(b-y)/Math.min(b,y)*100).toFixed(3)+'%':'Разница: нет данных';
+   el('status').textContent=good+' из '+coins.length+' пар получены • '+new Date().toLocaleTimeString('ru-RU');
+   el('refresh').textContent='↻';
+ }
+ function schedule(){clearInterval(timer);timer=setInterval(update,Number(el('interval').value));}
+ el('refresh').addEventListener('click',update); el('refresh2').addEventListener('click',update);
+ el('interval').addEventListener('change',schedule);
+ el('about').addEventListener('click',()=>alert('Спред = разница между более высокой и более низкой ценой, в процентах от низкой. Это только наблюдение: здесь не учитываются комиссии, вывод, глубина стакана, задержка котировок и движение цены.'));
+ update(); schedule();
+})();
+</script>
+</body>
+</html>
